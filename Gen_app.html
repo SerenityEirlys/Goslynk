@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KeyGen App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            padding: 16px;
+            color: #ffffff;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #2d2d2d;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            overflow: hidden;
+            height: fit-content;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: #2196F3;
+            color: white;
+            padding: 16px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .toggle-buttons {
+            display: flex;
+            background: #404040;
+            flex-shrink: 0;
+        }
+        
+        .toggle-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            color: #cccccc;
+        }
+        
+        .toggle-btn.active {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .status {
+            padding: 16px;
+            text-align: center;
+            color: #cccccc;
+            font-size: 14px;
+            border-bottom: 1px solid #404040;
+            flex-shrink: 0;
+        }
+        
+        .content {
+            height: 400px; /* Giảm chiều cao để vừa khít */
+            padding: 16px;
+            background: #2d2d2d;
+            overflow-y: auto;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .game-item, .token-item {
+            padding: 12px;
+            border: 1px solid #404040;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #3d3d3d;
+        }
+        
+        .game-item:hover, .token-item:hover {
+            background: #4d4d4d;
+            border-color: #2196F3;
+        }
+        
+        .game-item.selected, .token-item.selected {
+            background: #1e3a5f;
+            border-color: #2196F3;
+        }
+        
+        .game-name {
+            font-weight: bold;
+            color: #ffffff;
+        }
+        
+        .game-appid {
+            font-size: 12px;
+            color: #aaaaaa;
+            margin-top: 4px;
+        }
+        
+        .token-filename {
+            font-weight: bold;
+            color: #ffffff;
+        }
+        
+        .token-info {
+            font-size: 12px;
+            color: #aaaaaa;
+            margin-top: 4px;
+        }
+        
+        .token-expiry {
+            font-size: 11px;
+            color: #ff9800;
+            margin-top: 2px;
+            font-weight: bold;
+        }
+        
+        .token-expiry.expired {
+            color: #f44336;
+        }
+        
+        .token-expiry.warning {
+            color: #ff9800;
+        }
+        
+        .token-expiry.ok {
+            color: #4CAF50;
+        }
+        
+        .token-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .token-action-btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .token-action-btn.delete {
+            background: #f44336;
+            color: white;
+        }
+        
+        .token-action-btn.delete:hover {
+            background: #d32f2f;
+        }
+        
+        
+        .action-buttons {
+            display: flex;
+            padding: 16px;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .gen-btn {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .gen-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .download-btn {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .download-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .add-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+            transition: all 0.3s;
+            min-width: 100px; /* Cố định chiều rộng */
+            text-align: center;
+        }
+        
+        .add-btn:hover {
+            background: #45a049;
+        }
+        
+        .add-form {
+            background: #3d3d3d;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #555;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #cccccc;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background: #2d2d2d;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #2196F3;
+        }
+        
+        .form-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        
+        .form-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            flex: 1; /* Chia đều không gian */
+            min-width: 80px; /* Kích thước tối thiểu */
+            text-align: center;
+        }
+        
+        .form-btn.save {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .form-btn.cancel {
+            background: #f44336;
+            color: white;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #aaaaaa;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 20px;
+            color: #ff6b6b;
+            background: #3d1a1a;
+            border-radius: 8px;
+            border: 1px solid #ff6b6b;
+        }
+        
+        .success {
+            text-align: center;
+            padding: 20px;
+            color: #51cf66;
+            background: #1a3d1a;
+            border-radius: 8px;
+            border: 1px solid #51cf66;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            🎮 KeyGen App
+        </div>
+        
+        <div class="toggle-buttons">
+            <button class="toggle-btn active" onclick="showGames()">List Games</button>
+            <button class="toggle-btn" onclick="showTokens()">List Tokens</button>
+            <button class="add-btn" onclick="toggleAddForm()" id="addBtn">+ Add Game</button>
+        </div>
+        
+        <div class="status" id="status">
+            Select a game or token
+        </div>
+        
+        <div class="content" id="content">
+            <div id="addForm" class="add-form" style="display: none;">
+                <h3 style="color: #cccccc; margin-top: 0;">Add New Game</h3>
+                <div class="form-group">
+                    <label>Short Name:</label>
+                    <input type="text" id="shortName" placeholder="e.g., csgo, dota2" />
+                </div>
+                <div class="form-group">
+                    <label>App ID:</label>
+                    <input type="text" id="appId" placeholder="e.g., 730, 570" />
+                </div>
+                <div class="form-group">
+                    <label>Full Name:</label>
+                    <input type="text" id="fullName" placeholder="e.g., Counter-Strike: Global Offensive" />
+                </div>
+                <div class="form-buttons">
+                    <button class="form-btn cancel" onclick="cancelAddForm()">Cancel</button>
+                    <button class="form-btn save" onclick="addGame()">Add Game</button>
+                </div>
+            </div>
+            <div id="gameList"></div>
+            <div id="tokenList"></div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="action-btn gen-btn" id="genBtn" onclick="generateKey()" disabled>
+                GEN
+            </button>
+            <button class="action-btn download-btn" id="downloadBtn" onclick="downloadShare()" disabled>
+                DOWN/SHARE
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Real data from server
+        let games = [];
+        let tokens = [];
+        
+        let currentView = 'games';
+        let selectedGame = null;
+        let selectedToken = null;
+        
+        const SERVER_URL = "http://14.225.211.63:4001";
+        const SERVER_USER = "KeyGenApp";  // User riêng cho app này
+        
+        function showGames() {
+            currentView = 'games';
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('status').textContent = 'Loading games...';
+            document.getElementById('gameList').style.display = 'block';
+            document.getElementById('tokenList').style.display = 'none';
+            loadGames();
+            clearSelection();
+            hideAddForm();
+        }
+        
+        function showTokens() {
+            currentView = 'tokens';
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('status').textContent = 'Loading tokens...';
+            document.getElementById('gameList').style.display = 'none';
+            document.getElementById('tokenList').style.display = 'block';
+            loadTokens();
+            clearSelection();
+            hideAddForm();
+        }
+        
+        // Load games from server
+        async function loadGames() {
+            try {
+                const response = await fetch(`${SERVER_URL}/discord/games`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                games = [];
+                
+                // Parse games from server response
+                if (data.games) {
+                    for (const [shortName, gameInfo] of Object.entries(data.games)) {
+                        games.push({
+                            shortName: shortName,
+                            appId: gameInfo.appid,
+                            fullName: gameInfo.full_name
+                        });
+                    }
+                }
+                
+                renderGames();
+                document.getElementById('status').textContent = `Loaded ${games.length} games`;
+            } catch (error) {
+                console.error('Error loading games:', error);
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        Error loading games: ${error.message}<br>
+                        Make sure server is running on ${SERVER_URL}<br>
+                        Check if games_database.json exists on VPS
+                    </div>
+                `;
+                document.getElementById('status').textContent = 'Error loading games';
+            }
+        }
+        
+        // Check server status
+        async function checkServerStatus() {
+            try {
+                const response = await fetch(`${SERVER_URL}/health`, {
+                    method: 'GET',
+                    timeout: 5000
+                });
+                
+                if (response.ok) {
+                    return '✅ Server is running';
+                } else {
+                    return `❌ Server error: ${response.status}`;
+                }
+            } catch (error) {
+                return `❌ Cannot connect: ${error.message}`;
+            }
+        }
+        
+        // Token expiry functions
+        function calculateTokenExpiry(filename) {
+            // Parse timestamp from filename: 1807220417 2358720 10_25 22_42.goslynk
+            const timestampMatch = filename.match(/(\d+)\s+\d+\s+(\d+)_(\d+)\s+(\d+)_(\d+)\.goslynk/);
+            
+            if (!timestampMatch) {
+                return { minutesLeft: 0, text: 'Unknown expiry', isExpired: true };
+            }
+            
+            const [, steamId, month, day, hour, minute] = timestampMatch;
+            
+            // Create date from filename timestamp
+            const currentYear = new Date().getFullYear();
+            const tokenDate = new Date(currentYear, parseInt(month) - 1, parseInt(day), parseInt(hour), parseInt(minute));
+            
+            // Add 30 minutes (token expiry time)
+            const expiryDate = new Date(tokenDate.getTime() + 30 * 60 * 1000);
+            const now = new Date();
+            
+            const diffMs = expiryDate.getTime() - now.getTime();
+            const minutesLeft = Math.max(0, Math.floor(diffMs / (1000 * 60)));
+            const secondsLeft = Math.max(0, Math.floor((diffMs % (1000 * 60)) / 1000));
+            
+            const isExpired = minutesLeft === 0 && secondsLeft === 0;
+            
+            let text;
+            if (isExpired) {
+                text = '⏰ EXPIRED';
+            } else if (minutesLeft < 1) {
+                text = `⏰ ${secondsLeft}s left`;
+            } else {
+                text = `⏰ ${minutesLeft}m ${secondsLeft}s left`;
+            }
+            
+            return { minutesLeft, text, isExpired };
+        }
+        
+        function getExpiryClass(minutesLeft) {
+            if (minutesLeft === 0) return 'expired';
+            if (minutesLeft <= 5) return 'warning';
+            return 'ok';
+        }
+        
+        function startCountdownTimers() {
+            // Clear existing timers
+            if (window.tokenTimers) {
+                window.tokenTimers.forEach(timer => clearInterval(timer));
+            }
+            window.tokenTimers = [];
+            
+            // Start countdown for each token
+            tokens.forEach(token => {
+                const elementId = `expiry-${token.filename.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                const element = document.getElementById(elementId);
+                
+                if (element) {
+                    const timer = setInterval(() => {
+                        const expiryInfo = calculateTokenExpiry(token.filename);
+                        const expiryClass = getExpiryClass(expiryInfo.minutesLeft);
+                        
+                        element.textContent = expiryInfo.text;
+                        element.className = `token-expiry ${expiryClass}`;
+                        
+                        // Stop timer if expired
+                        if (expiryInfo.isExpired) {
+                            clearInterval(timer);
+                        }
+                    }, 1000); // Update every second
+                    
+                    window.tokenTimers.push(timer);
+                }
+            });
+        }
+        
+        // Load tokens from server with retry
+        async function loadTokens() {
+            const maxRetries = 3;
+            let retryCount = 0;
+            
+            while (retryCount < maxRetries) {
+                try {
+                    const response = await fetch(`${SERVER_URL}/tokens/${SERVER_USER}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const data = await response.json();
+                    tokens = [];
+                    
+                    // Parse tokens from server response
+                    if (data.tokens) {
+                        tokens = data.tokens.map(token => ({
+                            filename: token.filename,
+                            size: token.size,
+                            appId: extractAppIdFromFilename(token.filename)
+                        }));
+                    }
+                    
+                    renderTokens();
+                    document.getElementById('status').textContent = `Loaded ${tokens.length} tokens`;
+                    return; // Success, exit retry loop
+                    
+                } catch (error) {
+                    retryCount++;
+                    console.error(`Attempt ${retryCount} failed:`, error);
+                    
+                    if (retryCount >= maxRetries) {
+                        // All retries failed
+                        console.error('All retry attempts failed');
+                        document.getElementById('tokenList').innerHTML = `
+                            <div class="error">
+                                Error loading tokens: ${error.message}<br>
+                                <strong>Server:</strong> ${SERVER_URL}<br>
+                                <strong>User:</strong> ${SERVER_USER}<br>
+                                <button onclick="loadTokens()" style="margin-top: 10px; padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    🔄 Retry Connection
+                                </button>
+                            </div>
+                        `;
+                        document.getElementById('status').textContent = 'Connection failed - Click retry';
+                        return;
+                    }
+                    
+                    // Wait before retry
+                    await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+                }
+            }
+        }
+        
+        function renderGames() {
+            const gameList = document.getElementById('gameList');
+            if (games.length === 0) {
+                gameList.innerHTML = '<div class="error">No games found</div>';
+                return;
+            }
+            
+            gameList.innerHTML = games.map(game => `
+                <div class="game-item" onclick="selectGame('${game.shortName}')">
+                    <div class="game-name">${game.fullName}</div>
+                    <div class="game-appid">AppID: ${game.appId}</div>
+                </div>
+            `).join('');
+        }
+        
+        function renderTokens() {
+            const tokenList = document.getElementById('tokenList');
+            if (tokens.length === 0) {
+                tokenList.innerHTML = '<div class="error">No tokens found</div>';
+                return;
+            }
+            
+            tokenList.innerHTML = tokens.map(token => {
+                const expiryInfo = calculateTokenExpiry(token.filename);
+                const expiryClass = getExpiryClass(expiryInfo.minutesLeft);
+                const isExpired = expiryInfo.isExpired;
+                
+                return `
+                    <div class="token-item" onclick="selectToken('${token.filename}')">
+                        <div class="token-filename">${token.filename}</div>
+                        <div class="token-info">Size: ${formatSize(token.size)} | AppID: ${token.appId}</div>
+                        <div class="token-expiry ${expiryClass}" id="expiry-${token.filename.replace(/[^a-zA-Z0-9]/g, '_')}">
+                            ${expiryInfo.text}
+                        </div>
+                        <div class="token-actions" onclick="event.stopPropagation();">
+                            <button class="token-action-btn delete" onclick="deleteToken('${token.filename}')" title="Delete this token">
+                                🗑️ Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Start countdown timers
+            startCountdownTimers();
+        }
+        
+        function selectGame(shortName) {
+            selectedGame = games.find(g => g.shortName === shortName);
+            selectedToken = null;
+            
+            // Update UI
+            document.querySelectorAll('.game-item').forEach(item => item.classList.remove('selected'));
+            event.target.classList.add('selected');
+            
+            document.getElementById('genBtn').disabled = false;
+            document.getElementById('downloadBtn').disabled = true;
+            document.getElementById('status').textContent = `Selected: ${selectedGame.fullName}`;
+        }
+        
+        function selectToken(filename) {
+            selectedToken = tokens.find(t => t.filename === filename);
+            selectedGame = null;
+            
+            // Update UI
+            document.querySelectorAll('.token-item').forEach(item => item.classList.remove('selected'));
+            event.target.classList.add('selected');
+            
+            document.getElementById('genBtn').disabled = true;
+            document.getElementById('downloadBtn').disabled = false;
+            document.getElementById('status').textContent = `Selected: ${selectedToken.filename}`;
+        }
+        
+        function clearSelection() {
+            selectedGame = null;
+            selectedToken = null;
+            document.getElementById('genBtn').disabled = true;
+            document.getElementById('downloadBtn').disabled = true;
+        }
+        
+        async function generateKey() {
+            if (!selectedGame) return;
+            
+            document.getElementById('status').textContent = `Generating key for ${selectedGame.fullName}...`;
+            document.getElementById('genBtn').disabled = true;
+            
+            try {
+                // Start key generation
+                const response = await fetch(`${SERVER_URL}/gen/start`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user: SERVER_USER,
+                        appid: selectedGame.appId,
+                        gameName: selectedGame.fullName
+                    })
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                const jobId = data.jobId;
+                
+                document.getElementById('status').textContent = `Job created: ${jobId}. Waiting for completion...`;
+                
+                // Poll for job status
+                await pollJobStatus(jobId);
+                
+            } catch (error) {
+                console.error('Error generating key:', error);
+                document.getElementById('status').textContent = `Error: ${error.message}`;
+                document.getElementById('genBtn').disabled = false;
+            }
+        }
+        
+        async function pollJobStatus(jobId) {
+            const maxAttempts = 60; // 10 minutes max
+            let attempts = 0;
+            
+            const poll = async () => {
+                try {
+                    const response = await fetch(`${SERVER_URL}/gen/status/${jobId}`);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    
+                    const data = await response.json();
+                    const job = data.job;
+                    
+                    document.getElementById('status').textContent = `Status: ${job.status} - ${job.message || 'Processing...'}`;
+                    
+                    if (job.status === 'completed') {
+                        document.getElementById('status').textContent = 'Key generation completed! Check List Tokens.';
+                        document.getElementById('genBtn').disabled = false;
+                        
+                        // Refresh tokens if currently viewing tokens
+                        if (currentView === 'tokens') {
+                            loadTokens();
+                        }
+                        return;
+                    } else if (job.status === 'failed') {
+                        document.getElementById('status').textContent = `Generation failed: ${job.message}`;
+                        document.getElementById('genBtn').disabled = false;
+                        return;
+                    }
+                    
+                    // Continue polling
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                        setTimeout(poll, 10000); // Poll every 10 seconds
+                    } else {
+                        document.getElementById('status').textContent = 'Timeout waiting for key generation';
+                        document.getElementById('genBtn').disabled = false;
+                    }
+                    
+                } catch (error) {
+                    console.error('Error polling status:', error);
+                    document.getElementById('status').textContent = `Error checking status: ${error.message}`;
+                    document.getElementById('genBtn').disabled = false;
+                }
+            };
+            
+            poll();
+        }
+        
+        async function downloadShare() {
+            if (!selectedToken) {
+                alert('Please select a token first!');
+                return;
+            }
+            
+            // Show share options dialog
+            showShareOptions();
+        }
+        
+        function showShareOptions() {
+            const shareDialog = `
+                <div style="background: #3d3d3d; padding: 20px; border-radius: 8px; margin: 10px 0; border: 1px solid #555;">
+                    <h3 style="color: #cccccc; margin-top: 0; text-align: center;">Share Token</h3>
+                    <div style="text-align: center; margin: 15px 0; color: #aaaaaa;">
+                        <strong>${selectedToken.filename}</strong><br>
+                        Size: ${formatSize(selectedToken.size)} | AppID: ${selectedToken.appId}
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                        <button onclick="downloadToken()" style="flex: 1; min-width: 120px; padding: 12px; background: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            📥 Download
+                        </button>
+                        <button onclick="copyTokenLink()" style="flex: 1; min-width: 120px; padding: 12px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            🔗 Copy Link
+                        </button>
+                        <button onclick="shareViaWebAPI()" style="flex: 1; min-width: 120px; padding: 12px; background: #FF9800; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            📤 Share
+                        </button>
+                    </div>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button onclick="loadTokens()" style="padding: 8px 16px; background: #666; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            ← Back to Tokens
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('tokenList').innerHTML = shareDialog;
+        }
+        
+        async function downloadToken() {
+            if (!selectedToken) return;
+            
+            try {
+                document.getElementById('status').textContent = `Downloading ${selectedToken.filename}...`;
+                
+                const response = await fetch(`${SERVER_URL}/tokens/${SERVER_USER}/${selectedToken.filename}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = selectedToken.filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                document.getElementById('status').textContent = `✅ Downloaded: ${selectedToken.filename}`;
+                
+                // Show success message
+                setTimeout(() => {
+                    alert(`✅ Token downloaded successfully!\n\nFile: ${selectedToken.filename}\nSize: ${formatSize(selectedToken.size)}`);
+                }, 500);
+                
+            } catch (error) {
+                console.error('Error downloading token:', error);
+                alert(`❌ Download failed: ${error.message}`);
+                document.getElementById('status').textContent = 'Download failed';
+            }
+        }
+        
+        async function copyTokenLink() {
+            if (!selectedToken) return;
+            
+            const tokenUrl = `${SERVER_URL}/tokens/${SERVER_USER}/${selectedToken.filename}`;
+            
+            try {
+                await navigator.clipboard.writeText(tokenUrl);
+                document.getElementById('status').textContent = '✅ Link copied to clipboard!';
+                
+                // Show success message
+                setTimeout(() => {
+                    alert(`✅ Token link copied!\n\n${tokenUrl}\n\nYou can now share this link with others.`);
+                }, 500);
+                
+            } catch (error) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = tokenUrl;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    document.getElementById('status').textContent = '✅ Link copied to clipboard!';
+                    setTimeout(() => {
+                        alert(`✅ Token link copied!\n\n${tokenUrl}\n\nYou can now share this link with others.`);
+                    }, 500);
+                } catch (err) {
+                    alert(`❌ Copy failed. Please copy manually:\n\n${tokenUrl}`);
+                }
+                
+                document.body.removeChild(textArea);
+            }
+        }
+        
+        async function shareViaWebAPI() {
+            if (!selectedToken) return;
+            
+            const tokenUrl = `${SERVER_URL}/tokens/${SERVER_USER}/${selectedToken.filename}`;
+            const shareData = {
+                title: `KeyGen Token: ${selectedToken.filename}`,
+                text: `🎮 Game Token Download\n\nFile: ${selectedToken.filename}\nAppID: ${selectedToken.appId}\nSize: ${formatSize(selectedToken.size)}\n\nDownload: ${tokenUrl}`,
+                url: tokenUrl
+            };
+            
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                    document.getElementById('status').textContent = '✅ Shared successfully!';
+                } else {
+                    // Fallback: copy to clipboard
+                    await copyTokenLink();
+                }
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.error('Error sharing:', error);
+                    // Fallback: copy to clipboard
+                    await copyTokenLink();
+                }
+            }
+        }
+        
+        async function deleteToken(filename) {
+            if (!confirm(`Are you sure you want to delete this token?\n\n${filename}`)) {
+                return;
+            }
+            
+            try {
+                document.getElementById('status').textContent = `Deleting ${filename}...`;
+                
+                const response = await fetch(`${SERVER_URL}/tokens/${SERVER_USER}/${filename}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('status').textContent = `✅ Deleted: ${filename}`;
+                    
+                    // Remove from local tokens array
+                    tokens = tokens.filter(t => t.filename !== filename);
+                    
+                    // Clear selection if this was selected
+                    if (selectedToken && selectedToken.filename === filename) {
+                        selectedToken = null;
+                        document.getElementById('downloadBtn').disabled = true;
+                    }
+                    
+                    // Refresh token list
+                    renderTokens();
+                    
+                    // Show success message
+                    setTimeout(() => {
+                        alert(`✅ Token deleted successfully!\n\n${filename}`);
+                    }, 500);
+                } else {
+                    throw new Error(result.message || 'Delete failed');
+                }
+                
+            } catch (error) {
+                console.error('Error deleting token:', error);
+                alert(`❌ Delete failed: ${error.message}`);
+                document.getElementById('status').textContent = 'Delete failed';
+            }
+        }
+        
+        
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+        
+        function getCurrentTime() {
+            const now = new Date();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+            return `${month}_${day} ${hour}_${minute}`;
+        }
+        
+        function extractAppIdFromFilename(filename) {
+            // Extract AppID from filename like "123456 730 10_25 22_30.goslynk"
+            const parts = filename.split(' ');
+            if (parts.length >= 2) {
+                return parts[1];
+            }
+            return 'unknown';
+        }
+        
+        // Initialize
+        // Add Game functions
+        function toggleAddForm() {
+            const addForm = document.getElementById('addForm');
+            const addBtn = document.getElementById('addBtn');
+            
+            if (addForm.style.display === 'none') {
+                addForm.style.display = 'block';
+                addBtn.textContent = '- Cancel';
+                addBtn.style.background = '#f44336';
+            } else {
+                hideAddForm();
+            }
+        }
+        
+        function hideAddForm() {
+            const addForm = document.getElementById('addForm');
+            const addBtn = document.getElementById('addBtn');
+            
+            addForm.style.display = 'none';
+            addBtn.textContent = '+ Add Game';
+            addBtn.style.background = '#4CAF50';
+            
+            // Clear form
+            document.getElementById('shortName').value = '';
+            document.getElementById('appId').value = '';
+            document.getElementById('fullName').value = '';
+        }
+        
+        function cancelAddForm() {
+            hideAddForm();
+        }
+        
+        async function addGame() {
+            const shortName = document.getElementById('shortName').value.trim();
+            const appId = document.getElementById('appId').value.trim();
+            const fullName = document.getElementById('fullName').value.trim();
+            
+            if (!shortName || !appId || !fullName) {
+                alert('Please fill in all fields!');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${SERVER_URL}/discord/games`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        short_name: shortName,
+                        appid: appId,
+                        full_name: fullName
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Game added successfully!');
+                    hideAddForm();
+                    loadGames(); // Reload games list
+                } else {
+                    alert(`Error: ${result.message || 'Failed to add game'}`);
+                }
+                
+            } catch (error) {
+                console.error('Error adding game:', error);
+                alert(`Error adding game: ${error.message}`);
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            showGames();
+        });
+    </script>
+</body>
+</html>
